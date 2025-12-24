@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Allow public read/write access to Client form submissions
+    // WARNING: This allows anyone to read all client data. 
+    // Ideally, you should add authentication and only allow admins to read.
+    match /Client/{document=**} {
+      allow read, write: if true;
+    }
+
+    // Allow public read/write access to Employee/Job applications
+    // WARNING: This allows anyone to read all employee data.
+    match /Employee/{document=**} {
+      allow read, write: if true;
+    }
+
+    // Allow public read access to Projects for the portfolio
+    match /projects/{document=**} {
+      allow read: if true;
+      allow write: if false; // Only admin should modify projects (manually in console for now)
+    }
+    
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
