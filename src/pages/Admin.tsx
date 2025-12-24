@@ -27,6 +27,13 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs";
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
     Download,
     Search,
     Users,
@@ -39,7 +46,8 @@ import {
     ChevronRight,
     TrendingUp,
     LayoutGrid,
-    List as ListIcon
+    List as ListIcon,
+    Filter
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -49,6 +57,10 @@ const Admin = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+
+    // Filters
+    const [roleFilter, setRoleFilter] = useState("all");
+    const [projectTypeFilter, setProjectTypeFilter] = useState("all");
 
     const fetchData = async () => {
         setLoading(true);
@@ -97,17 +109,32 @@ const Admin = () => {
         XLSX.writeFile(workbook, `${fileName}_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
-    const filteredEmployees = employees.filter(emp =>
-        emp.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.role?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Filter Logic
+    const filteredEmployees = employees.filter(emp => {
+        const matchesSearch =
+            emp.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            emp.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            emp.role?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const filteredClients = clients.filter(client =>
-        client.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.projectType?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+        const matchesRole = roleFilter === "all" || emp.role === roleFilter;
+
+        return matchesSearch && matchesRole;
+    });
+
+    const filteredClients = clients.filter(client => {
+        const matchesSearch =
+            client.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            client.projectType?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesType = projectTypeFilter === "all" || client.projectType === projectTypeFilter;
+
+        return matchesSearch && matchesType;
+    });
+
+    // Extract Unique Values for Dropdowns
+    const uniqueRoles = Array.from(new Set(employees.map(e => e.role))).filter(Boolean);
+    const uniqueProjectTypes = Array.from(new Set(clients.map(c => c.projectType))).filter(Boolean);
 
     if (loading) {
         return (
@@ -235,19 +262,57 @@ const Admin = () => {
 
                     {/* Crew Content */}
                     <TabsContent value="crew" className="space-y-4">
-                        <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/10">
-                            <h2 className="font-bold text-lg flex items-center gap-2">
-                                <Users className="w-5 h-5 text-primary" />
-                                Applicants
-                                <Badge variant="secondary" className="bg-primary/20 text-primary border-0">{filteredEmployees.length}</Badge>
-                            </h2>
-                            <Button
-                                size="sm"
-                                onClick={() => downloadExcel(employees, "Crew_Applications")}
-                                className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
-                            >
-                                <Download className="w-4 h-4 mr-2" /> Export
-                            </Button>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10 gap-4">
+                            <div className="flex items-center gap-4">
+                                <h2 className="font-bold text-lg flex items-center gap-2">
+                                    <Users className="w-5 h-5 text-primary" />
+                                    Applicants
+                                    <Badge variant="secondary" className="bg-primary/20 text-primary border-0">{filteredEmployees.length}</Badge>
+                                </h2>
+
+                                {/* Role Filter */}
+                                <div className="hidden md:block w-[200px]">
+                                    <Select value={roleFilter} onValueChange={setRoleFilter}>
+                                        <SelectTrigger className="bg-black/20 border-white/10 text-white h-9">
+                                            <div className="flex items-center gap-2">
+                                                <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+                                                <SelectValue placeholder="Filter Role" />
+                                            </div>
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+                                            <SelectItem value="all">All Roles</SelectItem>
+                                            {uniqueRoles.map(role => (
+                                                <SelectItem key={role} value={role}>{role}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 w-full md:w-auto">
+                                {/* Mobile Filter (Visible only on mobile) */}
+                                <div className="md:hidden w-full">
+                                    <Select value={roleFilter} onValueChange={setRoleFilter}>
+                                        <SelectTrigger className="bg-black/20 border-white/10 text-white w-full">
+                                            <SelectValue placeholder="Filter Role" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+                                            <SelectItem value="all">All Roles</SelectItem>
+                                            {uniqueRoles.map(role => (
+                                                <SelectItem key={role} value={role}>{role}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <Button
+                                    size="sm"
+                                    onClick={() => downloadExcel(employees, "Crew_Applications")}
+                                    className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 whitespace-nowrap"
+                                >
+                                    <Download className="w-4 h-4 mr-2" /> Export
+                                </Button>
+                            </div>
                         </div>
 
                         {viewMode === 'table' ? (
@@ -333,19 +398,56 @@ const Admin = () => {
 
                     {/* Client Content */}
                     <TabsContent value="clients" className="space-y-4">
-                        <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/10">
-                            <h2 className="font-bold text-lg flex items-center gap-2">
-                                <Briefcase className="w-5 h-5 text-yellow-500" />
-                                Inquiries
-                                <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 border-0">{filteredClients.length}</Badge>
-                            </h2>
-                            <Button
-                                size="sm"
-                                onClick={() => downloadExcel(clients, "Client_Inquiries")}
-                                className="bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 border border-yellow-500/20"
-                            >
-                                <Download className="w-4 h-4 mr-2" /> Export
-                            </Button>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10 gap-4">
+                            <div className="flex items-center gap-4">
+                                <h2 className="font-bold text-lg flex items-center gap-2">
+                                    <Briefcase className="w-5 h-5 text-yellow-500" />
+                                    Inquiries
+                                    <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 border-0">{filteredClients.length}</Badge>
+                                </h2>
+
+                                {/* Project Type Filter */}
+                                <div className="hidden md:block w-[200px]">
+                                    <Select value={projectTypeFilter} onValueChange={setProjectTypeFilter}>
+                                        <SelectTrigger className="bg-black/20 border-white/10 text-white h-9">
+                                            <div className="flex items-center gap-2">
+                                                <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+                                                <SelectValue placeholder="Filter Type" />
+                                            </div>
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+                                            <SelectItem value="all">All Types</SelectItem>
+                                            {uniqueProjectTypes.map(type => (
+                                                <SelectItem key={type} value={type}>{type}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 w-full md:w-auto">
+                                {/* Mobile Filter */}
+                                <div className="md:hidden w-full">
+                                    <Select value={projectTypeFilter} onValueChange={setProjectTypeFilter}>
+                                        <SelectTrigger className="bg-black/20 border-white/10 text-white w-full">
+                                            <SelectValue placeholder="Filter Type" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+                                            <SelectItem value="all">All Types</SelectItem>
+                                            {uniqueProjectTypes.map(type => (
+                                                <SelectItem key={type} value={type}>{type}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    onClick={() => downloadExcel(clients, "Client_Inquiries")}
+                                    className="bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 border border-yellow-500/20 whitespace-nowrap"
+                                >
+                                    <Download className="w-4 h-4 mr-2" /> Export
+                                </Button>
+                            </div>
                         </div>
 
                         {viewMode === 'table' ? (
