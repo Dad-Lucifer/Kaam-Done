@@ -14,6 +14,10 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+if (!firebaseConfig.apiKey) {
+    console.error("Firebase Configuration Error: Missing VITE_FIREBASE_API_KEY. Please check your environment variables in Vercel settings.");
+}
+
 import { getStorage } from "firebase/storage";
 
 // Initialize Firebase
