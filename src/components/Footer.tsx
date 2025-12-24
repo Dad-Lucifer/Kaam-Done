@@ -11,9 +11,9 @@ const Footer = () => {
 
   const socialLinks = [
     { icon: Instagram, href: "#", label: "Instagram", color: "hover:bg-pink-600 hover:border-pink-600 hover:text-white" },
-    { icon: Twitter, href: "#", label: "Twitter", color: "hover:bg-blue-400 hover:border-blue-400 hover:text-white" },
-    { icon: Linkedin, href: "#", label: "LinkedIn", color: "hover:bg-blue-700 hover:border-blue-700 hover:text-white" },
-    { icon: Youtube, href: "#", label: "YouTube", color: "hover:bg-red-600 hover:border-red-600 hover:text-white" },
+    //{ icon: Twitter, href: "#", label: "Twitter", color: "hover:bg-blue-400 hover:border-blue-400 hover:text-white" },
+   // { icon: Linkedin, href: "#", label: "LinkedIn", color: "hover:bg-blue-700 hover:border-blue-700 hover:text-white" },
+    //{ icon: Youtube, href: "#", label: "YouTube", color: "hover:bg-red-600 hover:border-red-600 hover:text-white" },
   ];
 
   const quickLinks = ["Services", "About", "Portfolio", "Join Crew", "Contact"];
@@ -50,7 +50,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12 border-t border-white/5 pt-12 md:pt-16">
           {/* Brand Column */}
           <div className="md:col-span-5 space-y-6 text-center md:text-left">
-            <a href="#" className="inline-block">
+            <a href="https://www.instagram.com/trandygraphy?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" className="inline-block">
               <img src={logo} alt="KAAM DONE" className="h-16 md:h-24 w-auto brightness-0 invert hover:brightness-100 transition-all duration-300 mx-auto md:mx-0" />
             </a>
             <p className="text-muted-foreground/60 leading-relaxed max-w-sm mx-auto md:mx-0">
@@ -98,7 +98,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <span className="block text-xs uppercase text-muted-foreground tracking-wider mb-1">Email Us</span>
-                  <span className="text-white font-medium hover:text-primary transition-colors cursor-pointer">hello@kamdone.com</span>
+                  <span className="text-white font-medium hover:text-primary transition-colors cursor-pointer">officaldjsmashx@gmail.com</span>
                 </div>
               </li>
               <li className="group flex flex-col md:flex-row items-center md:items-start gap-4">
@@ -107,16 +107,12 @@ const Footer = () => {
                 </div>
                 <div>
                   <span className="block text-xs uppercase text-muted-foreground tracking-wider mb-1">Call Us</span>
-                  <span className="text-white font-medium hover:text-primary transition-colors cursor-pointer">+1 (555) 123-4567</span>
+                  <span className="text-white font-medium hover:text-primary transition-colors cursor-pointer">+91 9136800177</span>
                 </div>
               </li>
               <li className="group flex flex-col md:flex-row items-center md:items-start gap-4">
                 <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
                   <MapPin className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <span className="block text-xs uppercase text-muted-foreground tracking-wider mb-1">Visit Us</span>
-                  <span className="text-white font-medium">123 Creative Street, Digital City, DC</span>
                 </div>
               </li>
             </ul>
