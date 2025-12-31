@@ -250,7 +250,7 @@ const Workflow = () => {
                     </div>
 
                     {/* Workflow Timeline */}
-                    <div ref={containerRef} className="max-w-6xl mx-auto relative px-0 sm:px-4 md:px-0">
+                    <div ref={containerRef} className="max-w-7xl mx-auto relative px-0 sm:px-4 md:px-0">
                         {/* 
                            Vertical Line Logic:
                            - Mobile/Small Screens: Left aligned
@@ -286,7 +286,7 @@ const Workflow = () => {
                                         className={`phase-card flex flex-col md:flex-row gap-6 md:gap-0 items-center relative transition-all duration-1000 transform ${isEven ? "md:flex-row-reverse" : "md:flex-row"} ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"}`}
                                     >
                                         {/* Content Side */}
-                                        <div className="w-full md:w-1/2 pl-16 pr-4 sm:pl-24 md:pl-0 md:px-12 lg:px-16">
+                                        <div className="w-full md:w-1/2 pl-16 pr-4 sm:pl-24 md:pl-0 md:px-12 lg:px-20">
                                             <div
                                                 className={`relative p-6 sm:p-8 md:p-10 rounded-[2rem] bg-[#0a0a0a] border border-white/10 overflow-hidden transition-all duration-500 group hover:border-white/20 hover:-translate-y-2`}
                                             >
@@ -328,14 +328,12 @@ const Workflow = () => {
                                         </div>
 
                                         {/* Timeline Node (Center) */}
-                                        {/* Mobile: Left aligned at 1.5rem (24px) center. Line is at left-6 (1.5rem). */}
-                                        <div className="absolute left-6 md:left-1/2 -translate-x-1/2 flex flex-col items-center z-10 top-0 md:top-auto md:relative lg:relative">
-                                            {/* 
-                                               Note on Mobile: The node is placed absolutely at the top-left of the Phase Card container row.
-                                               The content has padding-left to make room.
-                                               On desktop, it's flexed. 
-                                            */}
-                                            <div className={`w-10 h-10 md:w-14 md:h-14 rounded-full bg-[#050505] border-4 border-[#1a1a1a] flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,1)] transition-all duration-500 ${isVisible ? "scale-100 border-white/20" : "scale-0"} group-hover:border-primary group-hover:scale-125`}>
+                                        {/* Timeline Node (Center) */}
+                                        <div className={`absolute z-10 flex flex-col items-center justify-center transition-all duration-500
+                                            left-6 top-0 -translate-x-1/2
+                                            md:left-1/2 md:top-1/2 md:-translate-y-1/2
+                                        `}>
+                                            <div className={`w-10 h-10 md:w-16 md:h-16 rounded-full bg-[#050505] border-4 border-[#1a1a1a] flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,1)] transition-all duration-500 ${isVisible ? "scale-100 border-white/20" : "scale-0"} group-hover:border-primary group-hover:scale-125`}>
                                                 <div className={`w-3 h-3 md:w-5 md:h-5 rounded-full ${itemsBg} shadow-[0_0_10px_currentColor] ${isVisible ? "animate-pulse" : ""}`} />
                                             </div>
                                         </div>

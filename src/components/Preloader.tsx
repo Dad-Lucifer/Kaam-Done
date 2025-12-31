@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import desktopVideo from "@/assets/loading/Create_a_highimpact_1080p_202512202223.mp4";
+import { useState, useEffect, useRef } from "react";
+import desktopVideo from "@/assets/loading/load.mp4";
 import mobileVideo from "@/assets/loading/portrait 2.mp4";
 
 interface PreloaderProps {
@@ -9,6 +9,8 @@ interface PreloaderProps {
 const Preloader = ({ onComplete }: PreloaderProps) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isFading, setIsFading] = useState(false);
+    const desktopVideoRef = useRef<HTMLVideoElement>(null);
+    const mobileVideoRef = useRef<HTMLVideoElement>(null);
 
     const handleCreateExit = () => {
         if (isFading) return;
@@ -16,14 +18,30 @@ const Preloader = ({ onComplete }: PreloaderProps) => {
         setTimeout(() => {
             setIsVisible(false);
             onComplete();
-        }, 800); // Match CSS transition duration
+        }, 800); // Smooth fade out
     };
 
-    // Safety fallout: ensure we don't block the user forever if video has issues
     useEffect(() => {
-        // 15 seconds max timeout as a safety net
-        const timer = setTimeout(handleCreateExit, 15000);
-        return () => clearTimeout(timer);
+        // Robust playback handler for mobile/safari
+        const playVideo = async (videoEl: HTMLVideoElement | null) => {
+            if (videoEl) {
+                try {
+                    videoEl.currentTime = 0;
+                    await videoEl.play();
+                } catch (err) {
+                    console.warn("Auto-play failed:", err);
+                }
+            }
+        };
+
+        // Attempt to play both immediately on mount
+        // This helps in some browsers where autoPlay attribute is lazy
+        playVideo(desktopVideoRef.current);
+        playVideo(mobileVideoRef.current);
+
+        // Safety net: If video metadata never loads or stalls, exit after 15s
+        const safetyTimer = setTimeout(handleCreateExit, 15000);
+        return () => clearTimeout(safetyTimer);
     }, []);
 
     if (!isVisible) return null;
@@ -36,11 +54,17 @@ const Preloader = ({ onComplete }: PreloaderProps) => {
             {/* Desktop Video Container */}
             <div className="hidden md:block absolute inset-0 w-full h-full">
                 <video
+                    ref={desktopVideoRef}
                     autoPlay
                     muted
                     playsInline
+                    preload="auto"
                     className="w-full h-full object-cover"
                     onEnded={handleCreateExit}
+                    onError={(e) => {
+                        console.error("Video load error", e);
+                        handleCreateExit();
+                    }}
                     style={{ objectPosition: "center" }}
                 >
                     <source src={desktopVideo} type="video/mp4" />
@@ -51,11 +75,17 @@ const Preloader = ({ onComplete }: PreloaderProps) => {
             {/* Mobile Video Container */}
             <div className="md:hidden absolute inset-0 w-full h-full">
                 <video
+                    ref={mobileVideoRef}
                     autoPlay
                     muted
                     playsInline
+                    preload="auto"
                     className="w-full h-full object-cover"
                     onEnded={handleCreateExit}
+                    onError={(e) => {
+                        console.error("Video load error", e);
+                        handleCreateExit();
+                    }}
                     style={{ objectPosition: "center" }}
                 >
                     <source src={mobileVideo} type="video/mp4" />
@@ -63,15 +93,15 @@ const Preloader = ({ onComplete }: PreloaderProps) => {
                 </video>
             </div>
 
-            {/* Skip Button - UX Enhancement for "Optimized" feel */}
+            {/* Skip Button */}
             <button
                 onClick={handleCreateExit}
-                className="absolute bottom-8 right-8 z-50 text-white/50 hover:text-white text-sm uppercase tracking-widest font-bold border border-white/20 px-6 py-2 rounded-full backdrop-blur-md hover:bg-white/10 transition-all duration-300"
+                className="absolute bottom-12 right-8 z-50 text-white/50 hover:text-white text-xs md:text-sm uppercase tracking-widest font-bold border border-white/20 px-6 py-2 rounded-full backdrop-blur-md hover:bg-white/10 transition-all duration-300 pointer-events-auto"
             >
                 Skip Intro
             </button>
 
-            {/* Mobile-friendly Tap overlay to skip */}
+            {/* Mobile tap to skip overlay */}
             <div
                 className="absolute inset-0 z-40 md:hidden"
                 onClick={handleCreateExit}
