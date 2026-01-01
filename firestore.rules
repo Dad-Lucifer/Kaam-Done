@@ -21,6 +21,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if false; // Only admin should modify projects (manually in console for now)
     }
+
+    // Allow public read and create access to Testimonials
+    match /testimonials/{document=**} {
+      allow read, create: if true;
+    }
     
     // Default deny
     match /{document=**} {

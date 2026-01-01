@@ -1,6 +1,10 @@
+import { useState, useEffect } from "react";
 import { Star, Quote, CheckCircle2 } from "lucide-react";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { TestimonialDialog } from "./TestimonialDialog";
 
-const testimonials = [
+const INITIAL_TESTIMONIALS = [
   {
     name: "Sarah Johnson",
     role: "Proprietor, Neon Loft",
@@ -51,8 +55,6 @@ const testimonials = [
   }
 ];
 
-const TripleTestimonials = [...testimonials, ...testimonials, ...testimonials]; // Triple for smooth loop
-
 const HighlightStar = ({ delay }: { delay: number }) => (
   <div
     className="absolute w-1 h-1 bg-primary rounded-full animate-pulse"
@@ -65,6 +67,40 @@ const HighlightStar = ({ delay }: { delay: number }) => (
 );
 
 const TestimonialsSection = () => {
+  const [allTestimonials, setAllTestimonials] = useState(INITIAL_TESTIMONIALS);
+
+  useEffect(() => {
+    // Determine the query to use based on collection availability
+    // Since we create the collection on the fly, this query should be fine.
+    // However, if the collection doesn't exist yet, it will just return empty, which is fine.
+    const q = query(collection(db, "testimonials"), orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const newTestimonials = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          name: data.name,
+          role: data.role,
+          content: data.content,
+          rating: data.rating,
+          avatar: data.avatar,
+          gradient: data.gradient || "from-gray-500 to-slate-500" // Fallback gradient
+        };
+      });
+
+      // Combine new testimonials with the initial ones
+      setAllTestimonials([...newTestimonials, ...INITIAL_TESTIMONIALS]);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Triple for smooth loop
+  // Note: if user adds many testimonials, this array might get large. 
+  // For now it is fine, but in production with 100s of items, 
+  // we might want to limit the total number rendered or not triple everything if the list is long enough.
+  const displayTestimonials = [...allTestimonials, ...allTestimonials, ...allTestimonials];
+
   return (
     <section id="testimonials" className="py-24 bg-background relative overflow-hidden">
       {/* CSS for infinite scroll */}
@@ -95,14 +131,16 @@ const TestimonialsSection = () => {
       <div className="absolute bottom-0 w-full h-px bg-gradient-to-r from-transparent via-secondary/20 to-transparent" />
 
       <div className="container mx-auto px-4 relative z-10 mb-12 sm:mb-16">
-        <div className="text-center">
+        <div className="text-center flex flex-col items-center">
           <span className="text-primary font-bold text-sm uppercase tracking-widest mb-4 block animate-fade-in">Client Stories</span>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 text-white tracking-tight">
             Trusted by <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-primary to-accent">Visionaries</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-8">
             From startups to industry leaders, see how we've helped shape the digital landscape for over 500+ brands.
           </p>
+
+          <TestimonialDialog />
         </div>
       </div>
 
@@ -115,7 +153,7 @@ const TestimonialsSection = () => {
 
         {/* Row 1: Scrolling Left */}
         <div className="flex min-w-full animate-scroll-left">
-          {TripleTestimonials.map((item, idx) => (
+          {displayTestimonials.map((item, idx) => (
             <div key={`${item.name}-${idx}`} className="flex-shrink-0 w-[300px] sm:w-[350px] md:w-[450px] px-3 sm:px-4">
               <div className="group relative bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 md:p-8 hover:border-primary/30 transition-colors duration-300 h-full">
                 {/* Glow Effect */}
@@ -146,7 +184,7 @@ const TestimonialsSection = () => {
                   <div className="flex items-center gap-2 pt-4 border-t border-white/5">
                     <div className="flex gap-0.5">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 text-primary fill-primary" />
+                        <Star key={i} className={`w-3 h-3 sm:w-4 sm:h-4 ${i < item.rating ? "text-primary fill-primary" : "text-gray-700"}`} />
                       ))}
                     </div>
                     <span className="text-xs font-bold text-white ml-auto flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md">
@@ -161,7 +199,7 @@ const TestimonialsSection = () => {
 
         {/* Row 2: Scrolling Right */}
         <div className="flex min-w-full animate-scroll-right">
-          {TripleTestimonials.map((item, idx) => (
+          {displayTestimonials.map((item, idx) => (
             <div key={`${item.name}-rev-${idx}`} className="flex-shrink-0 w-[300px] sm:w-[350px] md:w-[450px] px-3 sm:px-4">
               <div className="group relative bg-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-secondary/30 transition-colors duration-300 h-full">
                 {/* Glow Effect */}
@@ -189,7 +227,7 @@ const TestimonialsSection = () => {
                   <div className="flex items-center gap-2 pt-4 border-t border-white/5">
                     <div className="flex gap-0.5">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-secondary fill-secondary" />
+                        <Star key={i} className={`w-4 h-4 ${i < item.rating ? "text-secondary fill-secondary" : "text-gray-700"}`} />
                       ))}
                     </div>
                     <span className="text-xs font-bold text-white ml-auto flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md">
@@ -206,5 +244,4 @@ const TestimonialsSection = () => {
     </section>
   );
 };
-
 export default TestimonialsSection;
