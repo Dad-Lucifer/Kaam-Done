@@ -47,7 +47,7 @@ const projects = [
     image: TGW,
     type: "website",
     size: "large",
-    link: "https://thunder-gaming.vercel.app/"
+    link: "https://thunder-cafe.vercel.app/"
   },
   {
     id: 3,

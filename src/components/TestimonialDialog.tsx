@@ -44,9 +44,21 @@ export function TestimonialDialog() {
             });
         } catch (error: any) {
             console.error("Login Error:", error);
+
+            let title = "Login Failed";
+            let description = error.message;
+
+            if (error.code === 'auth/unauthorized-domain') {
+                title = "Configuration Error";
+                description = "This domain is not authorized. Please add it to your Firebase Console > Authentication > Settings > Authorized Domains.";
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                title = "Cancelled";
+                description = "Sign in was cancelled.";
+            }
+
             toast({
-                title: "Login Failed",
-                description: error.message,
+                title,
+                description,
                 variant: "destructive",
             });
         }
