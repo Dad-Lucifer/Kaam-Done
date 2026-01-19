@@ -15,7 +15,7 @@ const categories = ["All", "Websites", "Video", "Photo", "Branding", "Social"];
 const projects = [
   {
     id: 101,
-    title: "Luxry Restorent Website",
+    title: "Luxry Restaurant Website",
     category: "Websites",
     image: KK,
     type: "website",
